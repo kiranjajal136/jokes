@@ -6,9 +6,21 @@
     <v-card>
       <v-card-title>Add a New Joke</v-card-title>
       <v-card-text>
-        <v-text-field v-model="setup" label="Setup" />
-        <v-text-field v-model="punchline" label="Punchline" />
-        <v-text-field v-model="type" label="Category" />
+        <v-text-field
+          v-model="setup"
+          label="Setup"
+          :rules="[requiredRule('Setup')]"
+        />
+        <v-text-field
+          v-model="punchline"
+          label="Punchline"
+          :rules="[requiredRule('Punchline')]"
+        />
+        <v-text-field
+          v-model="type"
+          label="Category"
+          :rules="[requiredRule('Category')]"
+        />
       </v-card-text>
       <v-card-actions>
         <v-btn color="success" @click="submit">Save</v-btn>
@@ -17,6 +29,7 @@
     </v-card>
   </v-dialog>
 </template>
+
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
@@ -34,6 +47,10 @@ const emit = defineEmits<{
   (e: 'add', joke: Joke): void
 }>()
 
+const requiredRule = (fieldName: string) => {
+  return (v: string) => !!v || `${fieldName} is required`
+}
+
 const allCategories = computed(() => {
   const apiCats = store.jokes.map(j => j.type)
   return [...new Set([...apiCats])].filter(Boolean)
@@ -42,7 +59,7 @@ const allCategories = computed(() => {
 function submit() {
   if (!setup.value || !punchline.value || !type.value) return
   emit('add', {
-    id: Date.now(),
+    _id: Date.now().toString(),
     setup: setup.value,
     punchline: punchline.value,
     type: type.value,

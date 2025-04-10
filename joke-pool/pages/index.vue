@@ -1,57 +1,64 @@
 <template>
-  <v-container>
-    <v-row class="mb-4">
-      <v-col cols="12" md="12" class="d-flex flex-wrap align-center justify-space-between">
-        <v-select
-          :items="categories"
-          v-model="categoryFilter"
-          label="Filter by category"
-          clearable
-          class="mx-2"
-        />
+  <div>
+    <v-container>
+      <v-row class="mb-4">
+        <v-col cols="12" md="12" class="d-flex flex-wrap align-center justify-space-between">
+          <v-select
+            :items="categories"
+            v-model="categoryFilter"
+            label="Filter by category"
+            clearable
+            class="mx-2"
+          />
 
-        <v-select
-          class="ml-2"
-          :items="[5, 10, 20]"
-          v-model="store.jokesPerPage"
-          label="Jokes per page"
-        />
+          <v-select
+            class="ml-2"
+            :items="[5, 10, 20]"
+            v-model="store.jokesPerPage"
+            label="Jokes per page"
+          />
 
-        <v-text-field
-          v-model="searchQuery"
-          label="Search jokes"
-          append-icon="mdi-magnify"
-          class="ml-4"
-          data-test-id="search-joke"
-        />
-      </v-col>
-  </v-row>
-  <v-row>
-    <v-col cols="12" md="6">
-      <JokeModal @add="addJoke" />
-    </v-col>
-    <v-col>
-      <v-btn
-        color="primary"
-        variant="outlined"
-        @click="toggleSort"
-      >
-        Sort: {{ sortDirection }}
-      </v-btn>
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-col cols="12" md="6" v-for="joke in paginated" :key="joke._id">
-      <JokeCard
-        :joke="joke"
-        @remove="removeJoke(joke._id)"
-        @rate="(r) => rateJoke(joke._id, r)"
-        @share="shareJoke(joke)"
-      />
-    </v-col>
-  </v-row>
-  <v-pagination v-model="page" :length="totalPages" class="mt-4" />
-  </v-container>
+          <v-text-field
+            v-model="searchQuery"
+            label="Search jokes"
+            append-icon="mdi-magnify"
+            class="ml-4"
+            data-test-id="search-joke"
+          />
+        </v-col>
+      </v-row>
+      <v-row>
+        <v-col cols="12" md="6">
+          <JokeModal @add="addJoke" />
+        </v-col>
+        <v-col>
+          <v-btn
+            color="primary"
+            variant="outlined"
+            @click="toggleSort"
+          >
+            Sort: {{ sortDirection }}
+          </v-btn>
+        </v-col>
+      </v-row>
+      <v-row v-if="loading">
+        <v-container class="d-flex justify-center align-center" style="height: 60vh;">
+          <v-progress-circular indeterminate color="primary" size="64" />
+        </v-container>
+      </v-row>
+      <v-row v-else>
+        <v-col cols="12" md="6" v-for="joke in paginated" :key="joke._id">
+          <JokeCard
+            :joke="joke"
+            @remove="removeJoke(joke._id)"
+            @rate="(r) => rateJoke(joke._id, r)"
+            @share="shareJoke(joke)"
+          />
+        </v-col>
+      </v-row>
+      <v-pagination v-model="page" :length="totalPages" class="mt-4" />
+    </v-container>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -69,9 +76,18 @@ const store = useJokeStore()
 const page = ref<number>(1)
 const categoryFilter = ref<string | null>(null)
 const searchQuery = ref<string>('')
+const loading = ref(true)
 
-onMounted(() => {
-  fetchSortedJokes()
+onMounted(async () => {
+  loading.value = true
+  try {
+    await store.fetchJokes({
+      sortBy: sortBy.value,
+      order: sortDirection.value
+    })
+  } finally {
+    loading.value = false
+  }
 })
 
 watch(() => store.jokesPerPage, () => {
