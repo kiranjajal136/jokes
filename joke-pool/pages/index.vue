@@ -51,12 +51,25 @@
           <JokeCard
             :joke="joke"
             @remove="removeJoke(joke._id)"
-            @rate="(r) => rateJoke(joke._id, r)"
+            @rate="(r) => {
+              joke.rating = r
+              rateJoke(joke._id, r)
+            }"
             @share="shareJoke(joke)"
           />
         </v-col>
       </v-row>
-      <v-pagination v-model="page" :length="totalPages" class="mt-4" />
+      <v-row class="mt-4 align-center justify-space-between">
+        <v-col cols="auto">
+          <div class="">
+            <b>Total Jokes:</b> <strong>{{ totalItems }}</strong>
+          </div>
+        </v-col>
+
+        <v-col>
+          <v-pagination v-model="page" :length="totalPages" class="mt-4" />
+        </v-col>
+      </v-row>
     </v-container>
   </div>
 </template>
@@ -95,6 +108,7 @@ watch(() => store.jokesPerPage, () => {
 })
 watch(sortBy, fetchSortedJokes)
 
+const totalItems = computed(() => filtered.value.length)
 
 const categories = computed<string[]>(() => {
   const all = store.allJokes.map((j: { type: Joke }) => j.type)

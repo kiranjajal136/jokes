@@ -53,4 +53,27 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+router.patch('/:id/rate', async (req, res) => {
+  const { id } = req.params;
+  const { rating } = req.body;
+
+  if (typeof rating !== 'number') {
+    return res.status(400).json({ message: 'Invalid rating' });
+  }
+
+  try {
+    const joke = await Joke.findById(id);
+    if (!joke) {
+      return res.status(404).json({ message: 'Joke not found' });
+    }
+
+    joke.rating = rating;
+    await joke.save();
+    res.json({ message: 'Rating updated', joke });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 export default router;

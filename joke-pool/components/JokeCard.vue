@@ -8,11 +8,18 @@
       <div class="text-caption text-grey">
         Category: <strong>{{ joke.type }}</strong>
       </div>
-      <RatingStars
-        :joke="joke"
-        @rate="(r) => $emit('rate', r)"
-        class="mt-2"
-      />
+      <div class="rating-row d-flex align-center mt-2">
+        <RatingStars
+          :joke="joke"
+          @rate="(r) => $emit('rate', r)"
+        />
+        <div
+          class="emoji-animate text-h4 ml-3"
+          v-if="joke.rating > 0"
+        >
+          {{ emojiForRating }}
+        </div>
+      </div>
     </v-card-text>
 
     <v-card-actions>
@@ -64,6 +71,14 @@ import { ref, watch, computed } from 'vue'
 const props = defineProps<{
   joke: Joke
 }>()
+
+const emojiForRating = computed(() => {
+  if (props.joke.rating >= 4) return '😊'
+  if (props.joke.rating === 3) return '😐'
+  if (props.joke.rating <= 2) return '😢'
+  return ''
+})
+
 
 function share(platform: string) {
   const jokeText = `${props.joke.setup} ${props.joke.punchline}`
@@ -124,4 +139,27 @@ const shareOptions = computed<ShareOption[]>(() => [
 .v-list-item :deep(.v-list-item__content) {
   display: flex;
 }
+
+.emoji-animate {
+  animation: bounceIn 0.6s ease-in-out;
+  display: inline-block;
+}
+
+@keyframes bounceIn {
+  0% {
+    transform: scale(0.3);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+  70% {
+    transform: scale(0.9);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
 </style>
