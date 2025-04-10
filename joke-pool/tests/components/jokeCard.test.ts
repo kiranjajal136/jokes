@@ -2,7 +2,6 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import JokeCard from '../../components/JokeCard.vue'
 import type { Joke } from '../../types/joke'
-
 const mockJoke: Joke = {
   _id: '1',
   setup: 'Why did the chicken cross the road?',
@@ -10,7 +9,6 @@ const mockJoke: Joke = {
   type: 'animal',
   rating: 3,
 }
-
 describe('JokeCard.vue', () => {
   let wrapper: ReturnType<typeof mount>
 
