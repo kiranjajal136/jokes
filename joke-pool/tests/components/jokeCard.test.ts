@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import JokeCard from '../../components/JokeCard.vue'
-import type { Joke } from '../../types/joke'
+import type { Joke } from '../../src/types/joke'
 const mockJoke: Joke = {
   _id: '1',
   setup: 'Why did the chicken cross the road?',

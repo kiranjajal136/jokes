@@ -41,15 +41,15 @@ export const useJokeStore = defineStore('jokes', () => {
   }
 
   async function rateJoke(id: number, rating: number) {
+    const jokeIndex = allJokes.value.findIndex(j => j._id === id.toString())
     const res = await fetch(`${API_URL}/${id}/rate`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rating })
+      body: JSON.stringify({ ...allJokes.value[jokeIndex], rating })
     })
 
     const updated = await res.json()
-    const idx = jokes.value.findIndex(j => j._id === id.toString())
-    if (idx !== -1) jokes.value[idx] = updated
+    if (jokeIndex !== -1) allJokes.value[jokeIndex] = updated.joke
   }
 
   function setJokesPerPage(count: number) {
@@ -66,6 +66,7 @@ export const useJokeStore = defineStore('jokes', () => {
     addJoke,
     removeJoke,
     rateJoke,
-    setJokesPerPage
+    setJokesPerPage,
+    // updateJokeRating
   }
 })

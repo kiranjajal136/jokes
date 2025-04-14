@@ -22,37 +22,34 @@
       </div>
     </v-card-text>
 
-    <v-card-actions>
+    <v-card-actions class="d-flex justify-end gap-2">
+      <v-menu>
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            variant="outlined"
+            color="primary"
+            prepend-icon="mdi-share-variant"
+            data-test-id="share-joke"
+          >
+            Share
+          </v-btn>
+        </template>
 
-    <v-menu>
-      <template #activator="{ props }">
-        <v-btn
-          v-bind="props"
-          variant="outlined"
-          color="primary"
-          prepend-icon="mdi-share-variant"
-          data-test-id="share-joke"
-        >
-          Share
-        </v-btn>
-      </template>
+        <v-list>
+          <v-list-item
+            v-for="(option, index) in shareOptions"
+            :key="index"
+            @click="option.action"
+            class="d-flex align-center"
+          >
+            <v-icon :color="option.color" start>{{ option.icon }}</v-icon>
+            <v-list-item-title>{{ option.label }}</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
 
-      <v-list>
-        <v-list-item
-          v-for="(option, index) in shareOptions"
-          :key="index"
-          @click="option.action"
-          class="d-flex align-center"
-        >
-          <v-icon :color="option.color" start>{{ option.icon }}</v-icon>
-          <v-list-item-title>{{ option.label }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-
-    <v-spacer/>
-
-     <v-btn
+      <v-btn
         variant="outlined"
         color="error"
         @click="$emit('remove')"
@@ -62,11 +59,11 @@
         Delete
       </v-btn>
     </v-card-actions>
+
   </v-card>
 </template>
 <script setup lang="ts">
 import type { Joke, ShareOption } from '../types/joke'
-import { ref, watch, computed } from 'vue'
 
 const props = defineProps<{
   joke: Joke

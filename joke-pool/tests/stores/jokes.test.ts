@@ -1,7 +1,7 @@
 import { setActivePinia, createPinia } from 'pinia'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useJokeStore } from '../../stores/jokes'
-import type { Joke } from '../../types/joke'
+import { useJokeStore } from '../../src/stores/jokes'
+import type { Joke } from '../../src/types/joke'
 
 const mockJokes: Joke[] = [
   {

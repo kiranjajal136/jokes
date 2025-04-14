@@ -8,7 +8,7 @@ export default defineNuxtConfig({
   build: {
     transpile: ['vuetify'],
   },
-
   modules: ['@pinia/nuxt'],
   compatibilityDate: '2025-04-07',
+  srcDir: 'src/'
 })

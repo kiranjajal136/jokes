@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import Index from '../../pages/index.vue'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { createTestingPinia } from '@pinia/testing'
-import { useJokeStore } from '../../stores/jokes'
+import { useJokeStore } from '../../src/stores/jokes'
 import { nextTick } from 'vue'
 
 describe('Index.vue', () => {

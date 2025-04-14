@@ -16,10 +16,13 @@
           label="Punchline"
           :rules="[requiredRule('Punchline')]"
         />
-        <v-text-field
+        <v-combobox
           v-model="type"
+          :items="allCategories"
           label="Category"
           :rules="[requiredRule('Category')]"
+          clearable
+          chips
         />
       </v-card-text>
       <v-card-actions>
@@ -32,16 +35,10 @@
 
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
 import { useJokeStore } from '../stores/jokes'
 import type { Joke } from '../types/joke'
 
 const store = useJokeStore()
-
-const dialog = ref<Boolean>(false)
-const setup = ref<string>('')
-const punchline = ref<string>('')
-const type = ref<string>('')
 
 const emit = defineEmits<{
   (e: 'add', joke: Joke): void
@@ -55,6 +52,11 @@ const allCategories = computed(() => {
   const apiCats = store.jokes.map(j => j.type)
   return [...new Set([...apiCats])].filter(Boolean)
 })
+
+const setup = ref<string>('')
+const punchline = ref<string>('')
+const type = ref<string>('')
+const dialog = ref<Boolean>(false)
 
 function submit() {
   if (!setup.value || !punchline.value || !type.value) return
