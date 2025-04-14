@@ -37,6 +37,7 @@
 <script setup lang="ts">
 import { useJokeStore } from '../stores/jokes'
 import type { Joke } from '../types/joke'
+import { computed, ref } from 'vue'
 
 const store = useJokeStore()
 

@@ -66,12 +66,12 @@
 </template>
 
 <script setup lang="ts">
-import { useJokeStore } from '../src/stores/jokes'
+import { useRoute, useRouter } from 'vue-router'
+import { useJokeStore } from '../stores/jokes'
 import JokeCard from '../components/JokeCard.vue'
 import JokeModal from '../components/JokeModal.vue'
 import type { Joke } from '../types/joke'
 import { computed, onMounted, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 
 const route = useRoute()
 const router = useRouter()

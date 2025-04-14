@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { API_URL } from '../constants/index'
 import type { Joke } from '../types/joke'
-import { computed, ref } from 'vue'
+import { ref, computed } from 'vue'
 
 export const useJokeStore = defineStore('jokes', () => {
   const jokes = ref<Joke[]>([])

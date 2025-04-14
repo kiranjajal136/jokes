@@ -64,6 +64,7 @@
 </template>
 <script setup lang="ts">
 import type { Joke, ShareOption } from '../types/joke'
+import { computed } from 'vue'
 
 const props = defineProps<{
   joke: Joke

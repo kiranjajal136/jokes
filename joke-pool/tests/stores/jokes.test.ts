@@ -65,7 +65,7 @@ describe('useJokeStore', () => {
     const updatedJoke = { ...mockJokes[0], rating: 5 }
 
     const fetchSpy = vi.spyOn(globalThis, 'fetch').mockResolvedValue({
-      json: async () => updatedJoke
+      json: async () => ({ joke: updatedJoke }) // <-- Wrap it here
     } as Response)
 
     await store.rateJoke(1, 5)
@@ -74,7 +74,7 @@ describe('useJokeStore', () => {
       expect.stringContaining('/1/rate'),
       expect.objectContaining({
         method: 'PATCH',
-        body: JSON.stringify({ rating: 5 })
+        body: JSON.stringify({ ...mockJokes[0], rating: 5 })
       })
     )
 
