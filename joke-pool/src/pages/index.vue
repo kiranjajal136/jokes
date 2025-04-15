@@ -44,8 +44,8 @@
         <v-col cols="12" md="6" v-for="joke in paginated" :key="joke._id">
           <JokeCard
             :joke="joke"
-            @remove="removeJoke(Number(joke._id))"
-            @rate="(r) => rateJoke(Number(joke._id), r)"
+            @remove="() => removeJoke(joke._id)"
+            @rate="(r) => rateJoke(joke._id, r)"
             @share="shareJoke(joke)"
           />
         </v-col>
@@ -111,7 +111,7 @@ watch(() => route.query.sortDirection, (newVal) => {
 const totalItems = computed(() => filtered.value.length)
 
 const categories = computed<string[]>(() => {
-  const all = store.allJokes.map((j: Joke) => j.type)
+  const all = store.allJokes?.map((j: Joke) => j?.type) ?? []
   return [...new Set(all)].filter(Boolean)
 })
 
@@ -131,10 +131,9 @@ watch([categoryFilter], () => {
 })
 
 const filtered = computed<Joke[]>(() => {
-  return store.allJokes?.filter((j: { setup: string; punchline: string; type: string }) => {
-    const matchesCategory =
-      !categoryFilter.value || j.type === categoryFilter.value
-
+  const jokes = store.allJokes ?? []
+  return jokes.filter((j: Joke) => {
+    const matchesCategory = !categoryFilter.value || j?.type === categoryFilter.value
     return matchesCategory
   })
 })
@@ -158,7 +157,7 @@ function addJoke(joke: Joke) {
   store.addJoke(joke)
 }
 
-function removeJoke(id: number) {
+function removeJoke(id: string) {
   if (confirm('Are you sure you want to delete this joke?')) {
     try {
       store.removeJoke(id)
@@ -169,9 +168,9 @@ function removeJoke(id: number) {
   }
 }
 
-function rateJoke(id: number, rating: number) {
+function rateJoke(id: string, rating: number) {
   try {
-    const joke = store.allJokes.find(j => Number(j._id) === id)
+    const joke = store.allJokes.find(j => j._id === id)
     if (joke) {
       joke.rating = rating
     }

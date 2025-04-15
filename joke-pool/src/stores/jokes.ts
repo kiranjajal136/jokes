@@ -35,12 +35,12 @@ export const useJokeStore = defineStore('jokes', () => {
     jokes.value.unshift(data)
   }
 
-  async function removeJoke(id: number) {
+  async function removeJoke(id: string) {
     await fetch(`${API_URL}/${id}`, { method: 'DELETE' })
     jokes.value = jokes.value.filter(j => j._id !== id.toString())
   }
 
-  async function rateJoke(id: number, rating: number) {
+  async function rateJoke(id: string, rating: number) {
     const jokeIndex = allJokes.value.findIndex(j => j._id === id.toString())
     const res = await fetch(`${API_URL}/${id}/rate`, {
       method: 'PATCH',
