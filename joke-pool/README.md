@@ -13,3 +13,7 @@
 - Compile and Minify for Production
   ```bash
   npm run build
+
+- To run unit tests
+  ```bah
+  npm run test
