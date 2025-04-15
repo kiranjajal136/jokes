@@ -15,7 +15,7 @@
         />
         <div
           class="emoji-animate text-h4 ml-3"
-          v-if="joke.rating > 0"
+          v-if="(joke?.rating ?? 0) > 0"
         >
           {{ emojiForRating }}
         </div>
@@ -71,12 +71,15 @@ const props = defineProps<{
 }>()
 
 const emojiForRating = computed(() => {
-  if (props.joke.rating >= 4) return '😊'
-  if (props.joke.rating === 3) return '😐'
-  if (props.joke.rating <= 2) return '😢'
+  const rating = props.joke?.rating
+
+  if (!rating) return ''
+
+  if (rating >= 4) return '😊'
+  if (rating === 3) return '😐'
+  if (rating <= 2) return '😢'
   return ''
 })
-
 
 function share(platform: string) {
   const jokeText = `${props.joke.setup} ${props.joke.punchline}`
