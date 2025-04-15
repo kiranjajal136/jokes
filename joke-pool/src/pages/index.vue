@@ -13,7 +13,7 @@
 
           <v-select
             class="ml-2"
-            :items="[5, 10, 20]"
+            :items="JOKES_PER_PAGE_OPTIONS"
             v-model="store.jokesPerPage"
             label="Jokes per page"
           />
@@ -25,7 +25,7 @@
             class="ml-2 flex"
             height="60"
           >
-            Sort By Rating: {{ sortDirection }}
+            {{ JOKE_LIST_LABELS.sortByRating }}: {{ sortDirection }}
           </v-btn>
 
         </v-col>
@@ -36,7 +36,7 @@
         </v-col>
       </v-row>
       <v-row v-if="loading">
-        <v-container class="d-flex justify-center align-center" style="height: 60vh;">
+        <v-container class="d-flex justify-center align-center loading-container">
           <v-progress-circular indeterminate color="primary" size="64" />
         </v-container>
       </v-row>
@@ -44,8 +44,8 @@
         <v-col cols="12" md="6" v-for="joke in paginated" :key="joke._id">
           <JokeCard
             :joke="joke"
-            @remove="removeJoke(joke._id)"
-            @rate="(r) => rateJoke(joke._id, r)"
+            @remove="removeJoke(Number(joke._id))"
+            @rate="(r) => rateJoke(Number(joke._id), r)"
             @share="shareJoke(joke)"
           />
         </v-col>
@@ -72,6 +72,7 @@ import JokeCard from '../components/JokeCard.vue'
 import JokeModal from '../components/JokeModal.vue'
 import type { Joke } from '../types/joke'
 import { computed, onMounted, ref, watch } from 'vue'
+import { JOKE_LIST_LABELS, JOKES_PER_PAGE_OPTIONS } from '../constants/index'
 
 const route = useRoute()
 const router = useRouter()
@@ -110,7 +111,7 @@ watch(() => route.query.sortDirection, (newVal) => {
 const totalItems = computed(() => filtered.value.length)
 
 const categories = computed<string[]>(() => {
-  const all = store.allJokes.map((j: { type: Joke }) => j.type)
+  const all = store.allJokes.map((j: Joke) => j.type)
   return [...new Set(all)].filter(Boolean)
 })
 
@@ -159,21 +160,40 @@ function addJoke(joke: Joke) {
 
 function removeJoke(id: number) {
   if (confirm('Are you sure you want to delete this joke?')) {
-    store.removeJoke(id)
+    try {
+      store.removeJoke(id)
+    } catch (error) {
+      console.error('Failed to delete joke:', error)
+      alert('An error occurred while deleting the joke. Please try again.')
+    }
   }
 }
 
 function rateJoke(id: number, rating: number) {
-  const joke = store.allJokes.find(j => j._id === id)
-  if (joke) {
-    joke.rating = rating
+  try {
+    const joke = store.allJokes.find(j => Number(j._id) === id)
+    if (joke) {
+      joke.rating = rating
+    }
+    store.rateJoke(id, rating)
+  } catch (error) {
+    console.error('Failed to rate joke:', error)
+    alert('An error occurred while rating the joke. Please try again.')
   }
-  store.rateJoke(id, rating)
+}
+
+function openInNewTab(url: string) {
+  window.open(url, '_blank')
 }
 
 function shareJoke(joke: Joke) {
   const text = `${joke.setup} — ${joke.punchline}`
   const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`
-  window.open(url, '_blank')
+  openInNewTab(url)
 }
 </script>
+<style scoped>
+.loading-container {
+  height: 60vh;
+}
+</style>
