@@ -65,6 +65,7 @@
 <script setup lang="ts">
 import type { Joke, ShareOption } from '../types/joke'
 import { computed } from 'vue'
+import { SHARE_LABELS, RATING_THRESHOLDS } from '../constants/index'
 
 const props = defineProps<{
   joke: Joke
@@ -75,9 +76,9 @@ const emojiForRating = computed(() => {
 
   if (!rating) return ''
 
-  if (rating >= 4) return '😊'
-  if (rating === 3) return '😐'
-  if (rating <= 2) return '😢'
+  if (rating >= RATING_THRESHOLDS.high) return '😊'
+  if (rating === RATING_THRESHOLDS.medium) return '😐'
+  if (rating <= RATING_THRESHOLDS.low) return '😢'
   return ''
 })
 
@@ -88,13 +89,13 @@ function share(platform: string) {
   const encoded = encodeURIComponent(jokeText)
 
   switch (platform) {
-    case 'twitter':
+    case SHARE_LABELS.twitter:
       url = `https://twitter.com/intent/tweet?text=${encoded}`
       break
-    case 'whatsapp':
+    case SHARE_LABELS.whatsapp:
       url = `https://api.whatsapp.com/send?text=${encoded}`
       break
-    case 'facebook':
+    case SHARE_LABELS.facebook:
       url = `https://www.facebook.com/sharer/sharer.php?u=${encoded}`
       break
   }
@@ -105,30 +106,36 @@ function share(platform: string) {
 function copyToClipboard() {
   const jokeText = `${props.joke.setup} ${props.joke.punchline}`
   navigator.clipboard.writeText(jokeText)
-  alert('Joke copied to clipboard!')
+  navigator.clipboard.writeText(jokeText)
+    .then(() => {
+      alert(SHARE_LABELS.copiedMessage)
+    })
+    .catch((error) => {
+      console.error('Failed to copy joke to clipboard:', error)
+    })
 }
 
 const shareOptions = computed<ShareOption[]>(() => [
   {
-    label: 'Twitter',
+    label: SHARE_LABELS.twitter,
     icon: 'mdi-twitter',
     color: '#1DA1F2',
-    action: () => share('twitter')
+    action: () => share(SHARE_LABELS.twitter)
   },
   {
-    label: 'WhatsApp',
+    label: SHARE_LABELS.whatsapp,
     icon: 'mdi-whatsapp',
     color: '#25D366',
-    action: () => share('whatsapp')
+    action: () => share(SHARE_LABELS.whatsapp)
   },
   {
-    label: 'Facebook',
+    label: SHARE_LABELS.facebook,
     icon: 'mdi-facebook',
     color: '#1877F2',
-    action: () => share('facebook')
+    action: () => share(SHARE_LABELS.facebook)
   },
   {
-    label: 'Copy to Clipboard',
+    label: SHARE_LABELS.clipboard,
     icon: 'mdi-content-copy',
     color: 'grey',
     action: copyToClipboard

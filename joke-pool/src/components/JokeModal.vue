@@ -46,7 +46,7 @@
 import { useJokeStore } from '../stores/jokes'
 import type { Joke } from '../types/joke'
 import { computed, ref } from 'vue'
-import { JOKE_LABELS } from '../constants/index'
+import { JOKE_LABELS, ERROR_MESSAGES } from '../constants/index'
 
 const store = useJokeStore()
 
@@ -74,7 +74,7 @@ function submit() {
   errorMessage.value = ''
 
   if (!setup.value || !punchline.value || !type.value) {
-    errorMessage.value = 'Please fill in all fields before saving.'
+    errorMessage.value = ERROR_MESSAGES.fillAllFields
     return
   }
 
@@ -92,7 +92,7 @@ function submit() {
     punchline.value = ''
     type.value = ''
   } catch (err) {
-    errorMessage.value = 'Something went wrong while adding the joke.'
+    errorMessage.value = ERROR_MESSAGES.addJokeFailed
     console.error(err)
   }
 }
