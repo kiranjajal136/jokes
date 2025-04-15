@@ -1,33 +1,33 @@
 <template>
   <v-dialog v-model="dialog" width="500">
     <template #activator="{ props }">
-      <v-btn v-bind="props" color="primary">Add Joke</v-btn>
+      <v-btn v-bind="props" color="primary">{{ JOKE_LABELS.addJoke }}</v-btn>
     </template>
     <v-card>
-      <v-card-title>Add a New Joke</v-card-title>
+      <v-card-title>{{ JOKE_LABELS.addNewJoke }}</v-card-title>
       <v-card-text>
         <v-text-field
           v-model="setup"
-          label="Setup"
+          :label="JOKE_LABELS.setup"
           :rules="[requiredRule('Setup')]"
         />
         <v-text-field
           v-model="punchline"
-          label="Punchline"
+          :label="JOKE_LABELS.punchline"
           :rules="[requiredRule('Punchline')]"
         />
         <v-combobox
           v-model="type"
           :items="allCategories"
-          label="Category"
+          :label="JOKE_LABELS.category"
           :rules="[requiredRule('Category')]"
           clearable
           chips
         />
       </v-card-text>
       <v-card-actions>
-        <v-btn color="success" @click="submit">Save</v-btn>
-        <v-btn text @click="dialog = false">Cancel</v-btn>
+        <v-btn color="success" @click="submit">{{ JOKE_LABELS.save }}</v-btn>
+        <v-btn text @click="dialog = false">{{ JOKE_LABELS.cancel }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
@@ -38,6 +38,7 @@
 import { useJokeStore } from '../stores/jokes'
 import type { Joke } from '../types/joke'
 import { computed, ref } from 'vue'
+import { JOKE_LABELS } from '../constants/index'
 
 const store = useJokeStore()
 
@@ -57,7 +58,7 @@ const allCategories = computed(() => {
 const setup = ref<string>('')
 const punchline = ref<string>('')
 const type = ref<string>('')
-const dialog = ref<Boolean>(false)
+const dialog = ref<boolean>(false)
 
 function submit() {
   if (!setup.value || !punchline.value || !type.value) return
