@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { mount } from '@vue/test-utils'
 import JokeCard from '../../src/components/JokeCard.vue'
 import type { Joke } from '../../src/types/joke'
+import { ShareLabels } from '~/types/joke'
 
 const mockJoke: Joke = {
   _id: '1',
@@ -22,7 +23,7 @@ describe('JokeCard.vue', () => {
       global: {
         stubs: {
           RatingStars: {
-            template: `<button data-test-id="rate-btn" @click="$emit('rate', 5)">Rate</button>`,
+            template: '<button data-test-id="rate-btn" @click="$emit(\'rate\', 5)">Rate</button>',
           },
         },
       },
@@ -56,24 +57,29 @@ describe('JokeCard.vue', () => {
   it('opens sharing link in new window when sharing to Twitter', () => {
     const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
 
-    wrapper.vm.share('twitter')
+    wrapper.vm.share(ShareLabels.Twitter)
+
     expect(openSpy).toHaveBeenCalled()
     expect(openSpy.mock.calls[0][0]).toContain('twitter.com/intent/tweet')
+
     openSpy.mockRestore()
   })
 
   it('copies joke to clipboard', async () => {
-    const writeText = vi.fn()
+    const writeText = vi.fn(() => Promise.resolve())
     Object.assign(navigator, {
       clipboard: { writeText },
     })
 
-    window.alert = vi.fn() // Stub alert
+    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {})
 
-    wrapper.vm.copyToClipboard()
+    await wrapper.vm.copyToClipboard()
+
     expect(writeText).toHaveBeenCalledWith(
       'Why did the chicken cross the road? To get to the other side!'
     )
-    expect(window.alert).toHaveBeenCalledWith('Joke copied to clipboard!')
+    expect(alertSpy).toHaveBeenCalledWith(ShareLabels.CopiedMessage)
+
+    alertSpy.mockRestore()
   })
 })

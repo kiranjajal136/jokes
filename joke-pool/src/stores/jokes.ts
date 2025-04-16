@@ -1,15 +1,42 @@
 import { defineStore } from 'pinia'
-import { API_URL } from '../constants/index'
-import type { Joke } from '../types/joke'
-import { ref, computed } from 'vue'
+import type { Joke } from '~/types/joke'
+import { useRuntimeConfig } from 'nuxt/app'
 
 export const useJokeStore = defineStore('jokes', () => {
   const jokes = ref<Joke[]>([])
-  const loading = ref<Boolean>(false)
-  const jokesPerPage = ref<number>(10)
-  const sortBy = ref<string>('')
+  const loading = ref(false)
+  const jokesPerPage = ref(10)
+  const sortBy = ref('')
 
-  const allJokes = computed<Joke[]>(() => jokes.value)
+  const config = useRuntimeConfig()
+  const API_URL = config.public.apiUrl
+
+  const allJokes = computed(() => jokes.value)
+
+  const isLoading = computed(() => loading.value)
+
+  function setJokes(newJokes: Joke[]) {
+    jokes.value = newJokes
+  }
+
+  function addJokeLocally(joke: Joke) {
+    jokes.value.unshift(joke)
+  }
+
+  function removeJokeLocally(id: string) {
+    jokes.value = jokes.value.filter(j => j._id !== id)
+  }
+
+  function updateJokeRating(id: string, rating: number) {
+    const index = jokes.value.findIndex(j => j._id === id)
+    if (index !== -1) {
+      jokes.value[index] = { ...jokes.value[index], rating }
+    }
+  }
+
+  function setJokesPerPage(count: number) {
+    jokesPerPage.value = count
+  }
 
   async function fetchJokes(params = {}) {
     loading.value = true
@@ -17,7 +44,7 @@ export const useJokeStore = defineStore('jokes', () => {
       const query = new URLSearchParams(params).toString()
       const res = await fetch(`${API_URL}?${query}`)
       const data = await res.json()
-      jokes.value = data
+      setJokes(data)
     } catch (e) {
       console.error('Failed to fetch jokes:', e)
     } finally {
@@ -26,47 +53,55 @@ export const useJokeStore = defineStore('jokes', () => {
   }
 
   async function addJoke(joke: Joke) {
-    const res = await fetch(`${API_URL}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(joke)
-    })
-    const data = await res.json()
-    jokes.value.unshift(data)
+    try {
+      const res = await fetch(`${API_URL}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(joke),
+      })
+      const data = await res.json()
+      addJokeLocally(data)
+    } catch (e) {
+      console.error('Failed to add joke:', e)
+    }
   }
 
   async function removeJoke(id: string) {
-    await fetch(`${API_URL}/${id}`, { method: 'DELETE' })
-    jokes.value = jokes.value.filter(j => j._id !== id.toString())
+    try {
+      await fetch(`${API_URL}/${id}`, { method: 'DELETE' })
+      removeJokeLocally(id)
+    } catch (e) {
+      console.error('Failed to remove joke:', e)
+    }
   }
 
   async function rateJoke(id: string, rating: number) {
-    const jokeIndex = allJokes.value.findIndex(j => j._id === id.toString())
-    const res = await fetch(`${API_URL}/${id}/rate`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...allJokes.value[jokeIndex], rating })
-    })
+    const joke = jokes.value.find(j => j._id === id)
+    if (!joke) return
 
-    const updated = await res.json()
-    if (jokeIndex !== -1) allJokes.value[jokeIndex] = updated.joke
-  }
-
-  function setJokesPerPage(count: number) {
-    jokesPerPage.value = count
+    try {
+      const res = await fetch(`${API_URL}/${id}/rate`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...joke, rating }),
+      })
+      const updated = await res.json()
+      updateJokeRating(id, updated.joke.rating)
+    } catch (e) {
+      console.error('Failed to rate joke:', e)
+    }
   }
 
   return {
     jokes,
-    allJokes,
-    loading,
+    isLoading,
     jokesPerPage,
     sortBy,
+    allJokes,
+    setJokesPerPage,
     fetchJokes,
     addJoke,
     removeJoke,
     rateJoke,
-    setJokesPerPage,
-    // updateJokeRating
   }
 })

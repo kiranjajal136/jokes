@@ -10,12 +10,12 @@
       </div>
       <div class="rating-row d-flex align-center mt-2">
         <RatingStars
-          :joke="joke"
+          :rating="joke.rating ?? 0"
           @rate="(r) => $emit('rate', r)"
         />
         <div
-          class="emoji-animate text-h4 ml-3"
           v-if="(joke?.rating ?? 0) > 0"
+          class="emoji-animate text-h4 ml-3"
         >
           {{ emojiForRating }}
         </div>
@@ -40,8 +40,8 @@
           <v-list-item
             v-for="(option, index) in shareOptions"
             :key="index"
-            @click="option.action"
             class="d-flex align-center"
+            @click="option.action"
           >
             <v-icon :color="option.color" start>{{ option.icon }}</v-icon>
             <v-list-item-title>{{ option.label }}</v-list-item-title>
@@ -52,9 +52,9 @@
       <v-btn
         variant="outlined"
         color="error"
-        @click="$emit('remove')"
         prepend-icon="mdi-delete"
         data-test-id="delete-joke"
+        @click="$emit('remove')"
       >
         Delete
       </v-btn>
@@ -63,9 +63,7 @@
   </v-card>
 </template>
 <script setup lang="ts">
-import type { Joke, ShareOption } from '../types/joke'
-import { computed } from 'vue'
-import { SHARE_LABELS, RATING_THRESHOLDS } from '../constants/index'
+import { ShareLabels, type Joke, RatingThresholds, type ShareOption } from '~/types/joke'
 
 const props = defineProps<{
   joke: Joke
@@ -76,9 +74,9 @@ const emojiForRating = computed(() => {
 
   if (!rating) return ''
 
-  if (rating >= RATING_THRESHOLDS.high) return '😊'
-  if (rating === RATING_THRESHOLDS.medium) return '😐'
-  if (rating <= RATING_THRESHOLDS.low) return '😢'
+  if (rating >= RatingThresholds.High) return '😊'
+  if (rating === RatingThresholds.Medium) return '😐'
+  if (rating <= RatingThresholds.Low) return '😢'
   return ''
 })
 
@@ -89,13 +87,13 @@ function share(platform: string) {
   const encoded = encodeURIComponent(jokeText)
 
   switch (platform) {
-    case SHARE_LABELS.twitter:
+    case ShareLabels.Twitter:
       url = `https://twitter.com/intent/tweet?text=${encoded}`
       break
-    case SHARE_LABELS.whatsapp:
+    case ShareLabels.Whatsapp:
       url = `https://api.whatsapp.com/send?text=${encoded}`
       break
-    case SHARE_LABELS.facebook:
+    case ShareLabels.Facebook:
       url = `https://www.facebook.com/sharer/sharer.php?u=${encoded}`
       break
   }
@@ -108,7 +106,7 @@ function copyToClipboard() {
   navigator.clipboard.writeText(jokeText)
   navigator.clipboard.writeText(jokeText)
     .then(() => {
-      alert(SHARE_LABELS.copiedMessage)
+      alert(ShareLabels.CopiedMessage)
     })
     .catch((error) => {
       console.error('Failed to copy joke to clipboard:', error)
@@ -117,25 +115,25 @@ function copyToClipboard() {
 
 const shareOptions = computed<ShareOption[]>(() => [
   {
-    label: SHARE_LABELS.twitter,
+    label: ShareLabels.Twitter,
     icon: 'mdi-twitter',
     color: '#1DA1F2',
-    action: () => share(SHARE_LABELS.twitter)
+    action: () => share(ShareLabels.Twitter)
   },
   {
-    label: SHARE_LABELS.whatsapp,
+    label: ShareLabels.Whatsapp,
     icon: 'mdi-whatsapp',
     color: '#25D366',
-    action: () => share(SHARE_LABELS.whatsapp)
+    action: () => share(ShareLabels.Whatsapp)
   },
   {
-    label: SHARE_LABELS.facebook,
+    label: ShareLabels.Facebook,
     icon: 'mdi-facebook',
     color: '#1877F2',
-    action: () => share(SHARE_LABELS.facebook)
+    action: () => share(ShareLabels.Facebook)
   },
   {
-    label: SHARE_LABELS.clipboard,
+    label: ShareLabels.Clipboard,
     icon: 'mdi-content-copy',
     color: 'grey',
     action: copyToClipboard

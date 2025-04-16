@@ -4,6 +4,11 @@ export default defineNuxtConfig({
     '@mdi/font/css/materialdesignicons.css',
     '@/assets/styles.scss',
   ],
+  runtimeConfig: {
+    public: {
+      apiUrl: 'http://localhost:5000/api/jokes', //TODO: Store it in .env file
+    },
+  },
 
   build: {
     transpile: ['vuetify'],

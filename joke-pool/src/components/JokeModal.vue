@@ -1,26 +1,26 @@
 <template>
   <v-dialog v-model="dialog" width="500">
     <template #activator="{ props }">
-      <v-btn v-bind="props" color="primary">{{ JOKE_LABELS.addJoke }}</v-btn>
+      <v-btn v-bind="props" color="primary">{{ JokeLabels.AddJoke }}</v-btn>
     </template>
     <v-card>
-      <v-card-title>{{ JOKE_LABELS.addNewJoke }}</v-card-title>
+      <v-card-title>{{ JokeLabels.AddNewJoke }}</v-card-title>
       <v-card-text>
         <form @submit.prevent="submit">
           <v-text-field
             v-model="setup"
-            :label="JOKE_LABELS.setup"
+            :label="JokeLabels.Setup"
             :rules="[requiredRule('Setup')]"
           />
           <v-text-field
             v-model="punchline"
-            :label="JOKE_LABELS.punchline"
+            :label="JokeLabels.Punchline"
             :rules="[requiredRule('Punchline')]"
           />
           <v-combobox
             v-model="type"
             :items="allCategories"
-            :label="JOKE_LABELS.category"
+            :label="JokeLabels.Category"
             :rules="[requiredRule('Category')]"
             clearable
             chips
@@ -35,20 +35,16 @@
         {{ errorMessage }}
       </v-alert>
       <v-card-actions>
-        <v-btn color="success" @click="submit">{{ JOKE_LABELS.save }}</v-btn>
-        <v-btn text @click="dialog = false">{{ JOKE_LABELS.cancel }}</v-btn>
+        <v-btn color="success" @click="submit">{{ JokeLabels.Save }}</v-btn>
+        <v-btn text @click="dialog = false">{{ JokeLabels.Cancel }}</v-btn>
       </v-card-actions>
     </v-card>
   </v-dialog>
 </template>
 
 <script setup lang="ts">
-import { useJokeStore } from '../stores/jokes'
-import type { Joke } from '../types/joke'
-import { computed, ref } from 'vue'
-import { JOKE_LABELS, ERROR_MESSAGES } from '../constants/index'
-
-const store = useJokeStore()
+import { useJokeStore } from '~/stores/jokes'
+import { JokeLabels, ErrorMessages, type Joke } from '~/types/joke'
 
 const emit = defineEmits<{
   (e: 'add', joke: Joke): void
@@ -58,9 +54,11 @@ const requiredRule = (fieldName: string) => {
   return (v: string) => !!v || `${fieldName} is required`
 }
 
+const { jokes } = useJokeStore()
+
 const allCategories = computed(() => {
-  const apiCats = store.jokes.map(j => j.type)
-  return [...new Set([...apiCats])].filter(Boolean)
+  const apiCats = jokes?.map(j => j.type) ?? []
+  return [...new Set(apiCats)].filter(Boolean)
 })
 
 const setup = ref<string>('')
@@ -74,7 +72,7 @@ function submit() {
   errorMessage.value = ''
 
   if (!setup.value || !punchline.value || !type.value) {
-    errorMessage.value = ERROR_MESSAGES.fillAllFields
+    errorMessage.value = ErrorMessages.FillAllFields
     return
   }
 
@@ -92,7 +90,7 @@ function submit() {
     punchline.value = ''
     type.value = ''
   } catch (err) {
-    errorMessage.value = ERROR_MESSAGES.addJokeFailed
+    errorMessage.value = ErrorMessages.AddJokeFailed
     console.error(err)
   }
 }
