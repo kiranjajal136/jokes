@@ -24,7 +24,7 @@ const rating = ref(props.joke.rating || 0)
 watch(
   () => props.joke.rating,
   (val) => {
-    rating.value = val
+    rating.value = val ?? 0
   }
 )
 </script>
