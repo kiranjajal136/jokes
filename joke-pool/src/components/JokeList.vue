@@ -10,7 +10,7 @@
           />
   
           <v-select
-            v-model="jokesPerPage"
+            v-model="jokesPerPageComputed"
             class="ml-2"
             :items="JOKES_PER_PAGE_OPTIONS"
             label="Jokes per page"
@@ -70,7 +70,7 @@
   const router = useRouter()
   
   const store = useJokeStore()
-  const { allJokes, jokesPerPage, isLoading } = storeToRefs(store)
+  const { allJokes, jokesPerPageComputed, isLoading } = storeToRefs(store)
   const { fetchJokes, removeJoke, rateJoke } = store
   
   const page = ref(1)
@@ -79,7 +79,7 @@
   const categoryFilter = ref<string | null>(null)
   const firstRenderLoading = ref(true)
   
-  watch(jokesPerPage, () => { page.value = 1 })
+  watch(jokesPerPageComputed, () => { page.value = 1 })
   watch(sortBy, fetchSortedJokes)
   watch(() => route.query.sortDirection, (val) => {
     sortDirection.value = val === SortDirection.Descending ? SortDirection.Descending : SortDirection.Ascending
@@ -88,7 +88,7 @@
   watch([categoryFilter], () => { page.value = 1 })
   
   const totalItems = computed(() => filtered.value.length)
-  const totalPages = computed(() => Math.ceil(filtered.value.length / Number(jokesPerPage.value)))
+  const totalPages = computed(() => Math.ceil(filtered.value.length / Number(jokesPerPageComputed.value)))
   
   const categories = computed<string[]>(() => {
     const all = allJokes.value.map(j => j?.type)
@@ -100,8 +100,8 @@
   )
   
   const paginated = computed(() => {
-    const start = (page.value - 1) * Number(jokesPerPage.value)
-    return filtered.value.slice(start, start + Number(jokesPerPage.value))
+    const start = (page.value - 1) * Number(jokesPerPageComputed.value)
+    return filtered.value.slice(start, start + Number(jokesPerPageComputed.value))
   })
   
   const isPageLoading = computed(() => isLoading.value || firstRenderLoading.value)
