@@ -11,11 +11,6 @@ export const useJokeStore = defineStore('jokes', () => {
   const config = useRuntimeConfig()
   const API_URL = config.public.apiUrl
 
-  const allJokes = computed(() => jokes.value)
-  const isLoading = computed(() => loading.value)
-  const sortByComputed = computed(() => sortBy.value)
-  const jokesPerPageComputed = computed(() => jokesPerPage.value)
-
   function setJokes(newJokes: Joke[]) {
     jokes.value = newJokes
   }
