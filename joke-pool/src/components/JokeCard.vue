@@ -1,10 +1,14 @@
 <template>
-  <v-card class="mb-4 pa-4" elevation="2" transition="slide-y-transition">
-    <v-card-title class="text-h6">{{ joke.setup }}</v-card-title>
+  <v-card class="mb-4 pa-4 d-flex flex-column h-100" elevation="2" transition="slide-y-transition">
+    <v-card-title class="text-h6 text-wrap">
+      {{ joke.setup }}
+    </v-card-title>
 
-    <v-card-subtitle>{{ joke.punchline }}</v-card-subtitle>
+    <v-card-subtitle>
+      {{ joke.punchline }}
+    </v-card-subtitle>
 
-    <v-card-text>
+    <v-card-text class="flex-grow-1">
       <div class="text-caption text-grey">
         Category: <strong>{{ joke.type }}</strong>
       </div>
@@ -59,7 +63,7 @@
         Delete
       </v-btn>
     </v-card-actions>
-
+    
   </v-card>
 </template>
 <script setup lang="ts">

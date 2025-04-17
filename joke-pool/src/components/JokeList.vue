@@ -10,7 +10,7 @@
           />
   
           <v-select
-            v-model="jokesPerPageComputed"
+            v-model="jokesPerPage"
             class="ml-2"
             :items="JOKES_PER_PAGE_OPTIONS"
             label="Jokes per page"
@@ -70,7 +70,7 @@
   const router = useRouter()
   
   const store = useJokeStore()
-  const { allJokes, jokesPerPageComputed, isLoading } = storeToRefs(store)
+  const { jokes, jokesPerPage, loading } = storeToRefs(store)
   const { fetchJokes, removeJoke, rateJoke } = store
   
   const page = ref(1)
@@ -79,7 +79,7 @@
   const categoryFilter = ref<string | null>(null)
   const firstRenderLoading = ref(true)
   
-  watch(jokesPerPageComputed, () => { page.value = 1 })
+  watch(jokesPerPage, () => { page.value = 1 })
   watch(sortBy, fetchSortedJokes)
   watch(() => route.query.sortDirection, (val) => {
     sortDirection.value = val === SortDirection.Descending ? SortDirection.Descending : SortDirection.Ascending
@@ -88,23 +88,23 @@
   watch([categoryFilter], () => { page.value = 1 })
   
   const totalItems = computed(() => filtered.value.length)
-  const totalPages = computed(() => Math.ceil(filtered.value.length / Number(jokesPerPageComputed.value)))
+  const totalPages = computed(() => Math.ceil(filtered.value.length / Number(jokesPerPage.value)))
   
   const categories = computed<string[]>(() => {
-    const all = allJokes.value.map(j => j?.type)
+    const all = jokes.value.map(j => j?.type)
     return [...new Set(all)].filter(Boolean)
   })
   
   const filtered = computed(() =>
-    allJokes.value.filter(j => !categoryFilter.value || j?.type === categoryFilter.value)
+    jokes.value.filter(j => !categoryFilter.value || j?.type === categoryFilter.value)
   )
   
   const paginated = computed(() => {
-    const start = (page.value - 1) * Number(jokesPerPageComputed.value)
-    return filtered.value.slice(start, start + Number(jokesPerPageComputed.value))
+    const start = (page.value - 1) * Number(jokesPerPage.value)
+    return filtered.value.slice(start, start + Number(jokesPerPage.value))
   })
   
-  const isPageLoading = computed(() => isLoading.value || firstRenderLoading.value)
+  const isPageLoading = computed(() => loading.value || firstRenderLoading.value)
   
   function toggleSort() {
     sortDirection.value = sortDirection.value === SortDirection.Ascending ? SortDirection.Descending : SortDirection.Ascending
@@ -123,7 +123,7 @@
   }
   
   function addRating(id: string, rating: number) {
-    const joke = allJokes.value.find(j => j._id === id)
+    const joke = jokes.value.find(j => j._id === id)
     if (joke) {
       joke.rating = rating
       rateJoke(id, rating)

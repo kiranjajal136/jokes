@@ -94,11 +94,10 @@ export const useJokeStore = defineStore('jokes', () => {
   }
 
   return {
-    jokes,
-    isLoading,
-    jokesPerPageComputed,
-    sortByComputed,
-    allJokes,
+    jokes: computed(() => jokes.value),
+    loading: computed(() => loading.value),
+    jokesPerPage: computed(() => jokesPerPage.value),
+    sortByComputed: computed(() => sortBy.value),
     setJokesPerPage,
     fetchJokes,
     addJoke,
