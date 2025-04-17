@@ -25,6 +25,24 @@ describe('JokeCard.vue', () => {
           RatingStars: {
             template: '<button data-test-id="rate-btn" @click="$emit(\'rate\', 5)">Rate</button>',
           },
+          VMenu: {
+            template: `
+              <div>
+                <slot name="activator" :props="{}" />
+                <div class="v-menu-content"><slot /></div>
+              </div>
+            `,
+          },
+          VList: {
+            template: '<div class="v-list"><slot /></div>',
+          },
+          VListItem: {
+            template: '<div class="v-list-item"><slot /></div>',
+          },
+          VListItemTitle: {
+            template: '<div class="v-list-item-title"><slot /></div>',
+          },
+          VIcon: true,
         },
       },
     })
@@ -82,4 +100,56 @@ describe('JokeCard.vue', () => {
 
     alertSpy.mockRestore()
   })
+
+  it('does not show emoji if rating is 0 or undefined', async () => {
+    await wrapper.setProps({ joke: { ...mockJoke, rating: 0 } })
+    expect(wrapper.find('.emoji-animate').exists()).toBe(false)
+  })
+  
+  it('shows emoji 😊 when rating is high', async () => {
+    await wrapper.setProps({ joke: { ...mockJoke, rating: 5 } })
+    expect(wrapper.text()).toContain('😊')
+  })
+  
+  it('shows emoji 😢 when rating is low', async () => {
+    await wrapper.setProps({ joke: { ...mockJoke, rating: 1 } })
+    expect(wrapper.text()).toContain('😢')
+  })
+  
+  it('renders category from joke type', () => {
+    expect(wrapper.text()).toContain(`Category: ${mockJoke.type}`)
+  })
+  
+  it('renders all share options in the menu', () => {
+    const listItems = wrapper.findAll('.v-list-item')
+    expect(listItems.length).toBe(4)
+  
+    const labels = listItems.map(item => item.text().trim())
+    expect(labels).toEqual(expect.arrayContaining([
+      ShareLabels.Twitter,
+      ShareLabels.Whatsapp,
+      ShareLabels.Facebook,
+      ShareLabels.Clipboard,
+    ]))
+  })
+  
+  it('opens WhatsApp share link in a new window', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    wrapper.vm.share(ShareLabels.Whatsapp)
+  
+    expect(openSpy).toHaveBeenCalled()
+    expect(openSpy.mock.calls[0][0]).toContain('api.whatsapp.com/send?text=')
+  
+    openSpy.mockRestore()
+  })
+  
+  it('opens Facebook share link in a new window', () => {
+    const openSpy = vi.spyOn(window, 'open').mockImplementation(() => null)
+    wrapper.vm.share(ShareLabels.Facebook)
+  
+    expect(openSpy).toHaveBeenCalled()
+    expect(openSpy.mock.calls[0][0]).toContain('facebook.com/sharer/sharer.php')
+  
+    openSpy.mockRestore()
+  })  
 })
