@@ -6,16 +6,35 @@ const router = express.Router()
 
 router.get('/', async (req, res) => {
   try {
-    const { category, sortBy = 'createdAt', order = 'desc' } = req.query
-    const filter = category ? { type: category } : {}
-    const sort = { [sortBy]: order === 'desc' ? -1 : 1 }
+    const {
+      category,
+      sortBy = 'createdAt',
+      order = 'desc',
+      page = 1,
+      limit = 10,
+    } = req.query;
 
-    const jokes = await Joke.find(filter).sort(sort)
-    res.status(StatusCodes.OK).json(jokes)
+    const filter = category ? { type: category } : {};
+    const sort = { [sortBy]: order === 'desc' ? -1 : 1 };
+
+    const pageNum = parseInt(page, 10);
+    const limitNum = parseInt(limit, 10);
+
+    const totalCount = await Joke.countDocuments(filter);
+    const jokes = await Joke.find(filter)
+      .sort(sort)
+      .skip((pageNum - 1) * limitNum)
+      .limit(limitNum);
+
+    res.status(StatusCodes.OK).json({
+      jokes,
+      totalCount,
+    });
   } catch (err) {
-    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err.message })
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: err.message });
   }
-})
+});
+
 
 router.post('/', async (req, res) => {
   const { setup, punchline, type } = req.body

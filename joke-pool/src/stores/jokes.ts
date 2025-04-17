@@ -7,6 +7,7 @@ export const useJokeStore = defineStore('jokes', () => {
   const loading = ref(false)
   const jokesPerPage = ref(10)
   const sortBy = ref('')
+  const totalCount = ref(0)
 
   const config = useRuntimeConfig()
   const API_URL = config.public.apiUrl
@@ -40,7 +41,8 @@ export const useJokeStore = defineStore('jokes', () => {
       const query = new URLSearchParams(params).toString()
       const res = await fetch(`${API_URL}?${query}`)
       const data = await res.json()
-      setJokes(data)
+      jokes.value = data.jokes
+      totalCount.value = data.totalCount
     } catch (e) {
       console.error('Failed to fetch jokes:', e)
     } finally {
@@ -93,6 +95,7 @@ export const useJokeStore = defineStore('jokes', () => {
     loading: computed(() => loading.value),
     jokesPerPage: computed(() => jokesPerPage.value),
     sortByComputed: computed(() => sortBy.value),
+    totalCount: computed(() => totalCount.value),
     setJokesPerPage,
     fetchJokes,
     addJoke,

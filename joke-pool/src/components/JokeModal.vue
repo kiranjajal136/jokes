@@ -10,32 +10,35 @@
           <v-text-field
             v-model="setup"
             :label="JokeLabels.Setup"
-            :rules="[requiredRule('Setup')]"
+            :error-messages="v$.setup.$errors.map(e => e.$message)"
+            @blur="v$.setup.$touch"
           />
           <v-text-field
             v-model="punchline"
             :label="JokeLabels.Punchline"
-            :rules="[requiredRule('Punchline')]"
+            :error-messages="v$.punchline.$errors.map(e => e.$message)"
+            @blur="v$.punchline.$touch"
           />
           <v-combobox
             v-model="type"
             :items="allCategories"
             :label="JokeLabels.Category"
-            :rules="[requiredRule('Category')]"
+            :error-messages="v$.type.$errors.map(e => e.$message)"
+            @blur="v$.type.$touch"
             clearable
             chips
           />
         </form>
       </v-card-text>
-      <v-alert
-        v-if="errorMessage"
-        type="error"
-        dense
-      >
-        {{ errorMessage }}
-      </v-alert>
+
       <v-card-actions>
-        <v-btn color="success" @click="submit">{{ JokeLabels.Save }}</v-btn>
+        <v-btn
+          color="success"
+          @click="submit"
+          :disabled="isFormInvalid"
+        >
+          {{ JokeLabels.Save }}
+        </v-btn>
         <v-btn text @click="dialog = false">{{ JokeLabels.Cancel }}</v-btn>
       </v-card-actions>
     </v-card>
@@ -43,56 +46,56 @@
 </template>
 
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import { useJokeStore } from '~/stores/jokes'
 import { JokeLabels, ErrorMessages, type Joke } from '~/types/joke'
+import useVuelidate from '@vuelidate/core'
+import { required } from '@vuelidate/validators'
 
 const emit = defineEmits<{
   (e: 'add', joke: Joke): void
 }>()
 
-const requiredRule = (fieldName: string) => {
-  return (v: string) => !!v || `${fieldName} is required`
-}
-
 const { jokes } = useJokeStore()
+
+const setup = ref('')
+const punchline = ref('')
+const type = ref('')
+const dialog = ref(false)
 
 const allCategories = computed(() => {
   const apiCats = jokes?.map(j => j.type) ?? []
   return [...new Set(apiCats)].filter(Boolean)
 })
 
-const setup = ref<string>('')
-const punchline = ref<string>('')
-const type = ref<string>('')
-const dialog = ref<boolean>(false)
+const rules = computed(() => ({
+  setup: { required },
+  punchline: { required },
+  type: { required },
+}))
 
-const errorMessage = ref('')
+const v$ = useVuelidate(rules, { setup, punchline, type })
+
+const isFormInvalid = computed(() => {
+  return v$.value.$invalid
+})
 
 function submit() {
-  errorMessage.value = ''
+  v$.value.$touch()
+  if (v$.value.$invalid) return
 
-  if (!setup.value || !punchline.value || !type.value) {
-    errorMessage.value = ErrorMessages.FillAllFields
-    return
-  }
+  emit('add', {
+    _id: Date.now().toString(),
+    setup: setup.value,
+    punchline: punchline.value,
+    type: type.value,
+    rating: 0,
+  })
 
-  try {
-    emit('add', {
-      _id: Date.now().toString(),
-      setup: setup.value,
-      punchline: punchline.value,
-      type: type.value,
-      rating: 0,
-    })
-
-    dialog.value = false
-    setup.value = ''
-    punchline.value = ''
-    type.value = ''
-  } catch (err) {
-    errorMessage.value = ErrorMessages.AddJokeFailed
-    console.error(err)
-  }
+  setup.value = ''
+  punchline.value = ''
+  type.value = ''
+  v$.value.$reset()
+  dialog.value = false
 }
-
 </script>
